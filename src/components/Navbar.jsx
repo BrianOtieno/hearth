@@ -117,21 +117,33 @@ export default function Navbar() {
             className={`hidden md:flex items-center gap-8 text-sm ${!isCustom ? theme.muted : "opacity-80"}`}
           >
             <a
-              href="/#menu"
+              href="/#/---menu"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.hash = "#menu";
+              }}
               style={customAccentStyle}
               className="hover:opacity-100 transition-opacity"
             >
               Menu
             </a>
             <a
-              href="/#about"
+              href="/#/---about"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.hash = "#about";
+              }}
               style={customAccentStyle}
               className="hover:opacity-100 transition-opacity"
             >
               About
             </a>
             <a
-              href="/#visit"
+              href="/#/---visit"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.hash = "#visit";
+              }}
               style={customAccentStyle}
               className="hover:opacity-100 transition-opacity"
             >
@@ -159,19 +171,32 @@ export default function Navbar() {
             style={customHeaderStyle}
             className={`md:hidden border-b px-6 py-6 space-y-4 ${!isCustom ? `${theme.headerBg}${theme.border}` : ""}`}
           >
-            <a href="/#menu" onClick={() => setIsOpen(false)} className="block">
+            <a
+              href="#menu"
+              onClick={() => {
+                setIsOpen(false);
+                window.location.hash = "#menu";
+              }}
+              className="block"
+            >
               Menu
             </a>
             <a
-              href="/#about"
-              onClick={() => setIsOpen(false)}
+              href="#about"
+              onClick={() => {
+                setIsOpen(false);
+                window.location.hash = "#about";
+              }}
               className="block"
             >
               About
             </a>
             <a
-              href="/#visit"
-              onClick={() => setIsOpen(false)}
+              href="#visit"
+              onClick={() => {
+                setIsOpen(false);
+                window.location.hash = "#visit";
+              }}
               className="block"
             >
               Hours &amp; Location
