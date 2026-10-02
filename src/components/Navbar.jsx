@@ -87,6 +87,23 @@ export default function Navbar() {
     ? { backgroundColor: customColors.accent, color: customColors.bg }
     : {};
 
+  // Helper to handle smooth scrolling safely with HashRouter
+  const scrollToSection = (id) => {
+    // If we are not on the root store front view, navigate home first
+    if (
+      window.location.hash.includes("/about") ||
+      window.location.hash.includes("/admin") ||
+      window.location.hash.includes("/driver")
+    ) {
+      window.location.hash = "#/";
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <header
@@ -116,39 +133,27 @@ export default function Navbar() {
           <nav
             className={`hidden md:flex items-center gap-8 text-sm ${!isCustom ? theme.muted : "opacity-80"}`}
           >
-            <a
-              href="/#/---menu"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.hash = "#menu";
-              }}
+            <button
+              onClick={() => scrollToSection("menu")}
               style={customAccentStyle}
-              className="hover:opacity-100 transition-opacity"
+              className="hover:opacity-100 transition-opacity bg-transparent border-none cursor-pointer"
             >
               Menu
-            </a>
-            <a
-              href="/#/---about"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.hash = "#about";
-              }}
+            </button>
+            <button
+              onClick={() => scrollToSection("about")}
               style={customAccentStyle}
-              className="hover:opacity-100 transition-opacity"
+              className="hover:opacity-100 transition-opacity bg-transparent border-none cursor-pointer"
             >
               About
-            </a>
-            <a
-              href="/#/---visit"
-              onClick={(e) => {
-                e.preventDefault();
-                window.location.hash = "#visit";
-              }}
+            </button>
+            <button
+              onClick={() => scrollToSection("visit")}
               style={customAccentStyle}
-              className="hover:opacity-100 transition-opacity"
+              className="hover:opacity-100 transition-opacity bg-transparent border-none cursor-pointer"
             >
               Hours &amp; Location
-            </a>
+            </button>
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
@@ -171,36 +176,33 @@ export default function Navbar() {
             style={customHeaderStyle}
             className={`md:hidden border-b px-6 py-6 space-y-4 ${!isCustom ? `${theme.headerBg}${theme.border}` : ""}`}
           >
-            <a
-              href="#menu"
+            <button
               onClick={() => {
                 setIsOpen(false);
-                window.location.hash = "#menu";
+                scrollToSection("menu");
               }}
-              className="block"
+              className="block w-full text-left bg-transparent border-none cursor-pointer py-1"
             >
               Menu
-            </a>
-            <a
-              href="#about"
+            </button>
+            <button
               onClick={() => {
                 setIsOpen(false);
-                window.location.hash = "#about";
+                scrollToSection("about");
               }}
-              className="block"
+              className="block w-full text-left bg-transparent border-none cursor-pointer py-1"
             >
               About
-            </a>
-            <a
-              href="#visit"
+            </button>
+            <button
               onClick={() => {
                 setIsOpen(false);
-                window.location.hash = "#visit";
+                scrollToSection("visit");
               }}
-              className="block"
+              className="block w-full text-left bg-transparent border-none cursor-pointer py-1"
             >
               Hours &amp; Location
-            </a>
+            </button>
             <button
               onClick={() => {
                 setIsOpen(false);

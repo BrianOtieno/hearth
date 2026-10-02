@@ -5,5 +5,5 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: "/hearth/",
+  base: "./", // Works universally for both GitHub Pages subpaths and EC2 root/subdomains!
 });
