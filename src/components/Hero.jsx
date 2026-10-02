@@ -71,6 +71,10 @@ export default function Hero() {
 
   const t = themes[activeTheme] || themes.espresso;
 
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center px-6 py-20 overflow-hidden transition-colors duration-500">
       {/* Background radial glow */}
@@ -83,41 +87,42 @@ export default function Hero() {
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border ${t.badge} text-xs font-medium tracking-wide`}
           >
-            <Sparkles size={13} /> Artisan Bakery &amp; Live Dispatch Matrix
+            <Sparkles size={13} /> Neighborhood Artisan Bakery, Est. 2019
           </div>
 
           <h1
             className={`font-serif text-5xl sm:text-7xl font-light tracking-tight leading-[1.05] ${t.headingText}`}
           >
-            Baking crafted like{" "}
-            <span className={`italic ${t.accentText}`}>fine art.</span>
+            Bread worth waking <br />
+            up <span className={`italic ${t.accentText}`}>early for.</span>
           </h1>
 
           <p
             className={`${t.mutedText} text-lg font-light max-w-xl leading-relaxed`}
           >
-            24-hour fermented sourdough, hand-laminated viennoiserie, and
-            precision-engineered morning deliveries. Built for modern
-            connoisseurs.
+            Sourdough proofed overnight, pastries laminated by hand, and coffee
+            from local roasters — baked fresh every morning in small batches.
           </p>
 
           <div className="flex flex-wrap items-center gap-4 pt-4">
-            <a
-              href="#menu"
-              className={`px-8 py-4 font-medium rounded-full transition-all duration-300 flex items-center gap-2 group ${t.buttonMain}`}
+            <button
+              type="button"
+              onClick={() => scrollToSection("menu")}
+              className={`px-8 py-4 font-medium rounded-full transition-all duration-300 flex items-center gap-2 group cursor-pointer ${t.buttonMain}`}
             >
               <span>Explore Counter</span>
               <ArrowUpRight
                 size={18}
                 className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
               />
-            </a>
-            <a
-              href="#visit"
-              className={`px-8 py-4 font-medium rounded-full transition-all duration-300 border ${t.buttonOutline}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("visit")}
+              className={`px-8 py-4 font-medium rounded-full transition-all duration-300 border cursor-pointer ${t.buttonOutline}`}
             >
               Visit Atelier
-            </a>
+            </button>
           </div>
         </div>
 

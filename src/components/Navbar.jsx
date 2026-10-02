@@ -87,21 +87,8 @@ export default function Navbar() {
     ? { backgroundColor: customColors.accent, color: customColors.bg }
     : {};
 
-  // Helper to handle smooth scrolling safely with HashRouter
   const scrollToSection = (id) => {
-    // If we are not on the root store front view, navigate home first
-    if (
-      window.location.hash.includes("/about") ||
-      window.location.hash.includes("/admin") ||
-      window.location.hash.includes("/driver")
-    ) {
-      window.location.hash = "#/";
-      setTimeout(() => {
-        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    } else {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (

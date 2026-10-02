@@ -103,6 +103,10 @@ export default function Storefront() {
 
   const t = themes[activeTheme] || themes.espresso;
 
+  const scrollToSection = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <div
       className={`min-h-screen ${t.pageBg} transition-colors duration-500 relative`}
@@ -128,18 +132,20 @@ export default function Storefront() {
             from local roasters — baked fresh every morning in small batches.
           </p>
           <div className="flex items-center gap-4 pt-2">
-            <a
-              href="#menu"
-              className={`px-7 py-3.5 font-medium rounded-full transition-all text-sm flex items-center gap-2 ${t.buttonMain}`}
+            <button
+              type="button"
+              onClick={() => scrollToSection("menu")}
+              className={`px-7 py-3.5 font-medium rounded-full transition-all text-sm flex items-center gap-2 cursor-pointer ${t.buttonMain}`}
             >
               <span>Explore Counter</span> <ArrowUpRight size={16} />
-            </a>
-            <a
-              href="#visit"
-              className={`px-7 py-3.5 font-medium rounded-full transition-all text-sm border ${t.buttonOutline}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("visit")}
+              className={`px-7 py-3.5 font-medium rounded-full transition-all text-sm border cursor-pointer ${t.buttonOutline}`}
             >
               Visit Atelier
-            </a>
+            </button>
           </div>
         </div>
 
@@ -246,13 +252,13 @@ export default function Storefront() {
         </div>
       </section>
 
-      {/* About Section (Scrollable on Homepage) */}
+      {/* About Section */}
       <About />
 
-      {/* Location & Hours Section (Modular Component) */}
+      {/* Location & Hours Section (Ensure LocationHours wrapper has id="visit") */}
       <LocationHours />
 
-      {/* Footer automatically includes the floating ThemeSwitcher */}
+      {/* Footer */}
       <Footer />
     </div>
   );
