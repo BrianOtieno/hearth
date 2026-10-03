@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Storefront from "./views/Storefront";
 import AboutPage from "./views/AboutPage";
 import DriverPortal from "./views/DriverPortal";
-import AdminDashboard from "./views/AdminDashboard";
+import Dashboard from "./views/Dashboard";
 import "./index.css";
 
 export default function App() {
@@ -13,7 +13,8 @@ export default function App() {
         <Route path="/" element={<Storefront />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/driver" element={<DriverPortal />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );

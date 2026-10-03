@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiLogin, apiFetch } from "../services/api";
-import { X, Shield, Lock, User, Mail } from "lucide-react";
+import { X, Shield, Lock, User } from "lucide-react";
 
 export default function AuthModal({ isOpen, onClose }) {
   const [isRegistering, setIsRegistering] = useState(false);
   const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,28 +35,54 @@ export default function AuthModal({ isOpen, onClose }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
     setError("");
+
+    // Username validation: No spaces or special characters (alphanumeric & underscores only)
+    const usernameRegex = /^[a-zA-Z0-9_]+$/;
+    if (!usernameRegex.test(username.trim())) {
+      setError(
+        "Username can only contain letters, numbers, and underscores (no spaces).",
+      );
+      return;
+    }
+
+    // Password validation: Minimum 6 characters
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    setLoading(true);
 
     try {
       if (isRegistering) {
-        await apiFetch("/auth/register", {
+        const data = await apiFetch("/auth/register", {
           method: "POST",
-          body: { username: username.trim(), email: email.trim(), password },
+          body: { username: username.trim(), name: name.trim(), password },
         });
-        const data = await apiLogin(username.trim(), password);
+
+        if (data.access_token) {
+          localStorage.setItem("hearth_token", data.access_token);
+          localStorage.setItem("hearth_role", data.role);
+          localStorage.setItem("hearth_name", data.name);
+          localStorage.setItem("hearth_user_id", data.user_id);
+        }
+
         onClose();
-        navigate(data.role === "admin" ? "/admin" : "/driver");
+        navigate("/dashboard");
       } else {
         const data = await apiLogin(username.trim(), password);
-        onClose();
-        if (data.role === "admin") {
-          navigate("/admin");
-        } else if (data.role === "driver") {
-          navigate("/driver");
-        } else {
-          setError("Unknown user role assigned.");
+
+        // Save session credentials to localStorage
+        if (data && data.access_token) {
+          localStorage.setItem("hearth_token", data.access_token);
+          localStorage.setItem("hearth_role", data.role);
+          localStorage.setItem("hearth_name", data.name);
+          localStorage.setItem("hearth_user_id", data.user_id);
         }
+
+        onClose();
+        navigate("/dashboard");
       }
     } catch (err) {
       setError(
@@ -117,7 +143,7 @@ export default function AuthModal({ isOpen, onClose }) {
       >
         <button
           onClick={onClose}
-          className={`absolute top-6 right-6 ${t.muted} hover:opacity-15 transition-opacity`}
+          className={`absolute top-6 right-6 ${t.muted} hover:opacity-80 transition-opacity`}
         >
           <X size={20} />
         </button>
@@ -133,8 +159,8 @@ export default function AuthModal({ isOpen, onClose }) {
           </h3>
           <p className={`text-xs ${t.muted} mt-1 font-light`}>
             {isRegistering
-              ? "Register a new operator or driver credential."
-              : "Unified access for drivers and administrators."}
+              ? "Register a new operator credential."
+              : "Access the bakery management system."}
           </p>
         </div>
 
@@ -184,7 +210,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
+                placeholder="e.g. lydia_sebaziga"
                 required
                 className={`w-full pl-10 pr-4 py-3 rounded-xl border ${t.inputBg} focus:outline-none text-sm`}
               />
@@ -196,18 +222,18 @@ export default function AuthModal({ isOpen, onClose }) {
               <label
                 className={`block text-xs font-mono uppercase tracking-wider ${t.muted} mb-2`}
               >
-                Email Address
+                Full Name
               </label>
               <div className="relative">
-                <Mail
+                <User
                   size={16}
                   className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${t.muted}`}
                 />
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@hearthgrain.com"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Lydia Sebaziga"
                   required
                   className={`w-full pl-10 pr-4 py-3 rounded-xl border ${t.inputBg} focus:outline-none text-sm`}
                 />
@@ -258,8 +284,8 @@ export default function AuthModal({ isOpen, onClose }) {
           className={`mt-6 pt-4 border-t ${t.border} text-[11px] ${t.muted} font-mono text-center`}
         >
           {isRegistering
-            ? "New accounts register with standard operator privileges."
-            : "Authorized personnel only."}
+            ? "New accounts register with user privileges for request tracking."
+            : "Authorized bakery administration only."}
         </div>
       </div>
     </div>
