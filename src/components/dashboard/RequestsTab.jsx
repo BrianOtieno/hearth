@@ -44,7 +44,7 @@ export default function RequestsTab({
       <div>
         <h2 className="font-serif text-2xl">Request Tracking Ledger</h2>
         <p className="text-xs text-[#9c8e82] mt-0.5">
-          Submit and monitor special product requests stored in MySQL.
+          Submit and monitor special product requests.
         </p>
       </div>
 

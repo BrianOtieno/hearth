@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Package, Clock } from "lucide-react";
+import { User, Package, Clock, ShieldCheck, Sparkles } from "lucide-react";
 
 export default function OverviewTab({
   userName,
@@ -16,14 +16,22 @@ export default function OverviewTab({
           <div className="w-12 h-12 rounded-2xl bg-[#e2b774]/10 border border-[#e2b774]/30 flex items-center justify-center text-[#e2b774] mb-4">
             <User size={24} />
           </div>
-          <h2 className="font-serif text-xl mb-1">{userName}</h2>
-          <span className="inline-block px-2.5 py-1 rounded-full bg-[#e2b774]/20 text-[#e2b774] font-mono text-[10px] uppercase tracking-wider mb-4">
-            Role: {userRole}
-          </span>
+          <h2 className="font-serif text-xl mb-1 text-[#fbf9f5]">
+            {userName || "Operator"}
+          </h2>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#e2b774]/20 text-[#e2b774] font-mono text-[10px] uppercase tracking-wider border border-[#e2b774]/30">
+              <ShieldCheck size={12} /> Role: {userRole}
+            </span>
+          </div>
           <p className="text-xs text-[#9c8e82] leading-relaxed">
-            Your operator account is active. You can track submissions, submit
-            inventory requests, and browse the catalog.
+            Your operator account is active at Hearth & Grain. You can manage
+            inventory products, attach catalog imagery, and monitor live
+            production requests.
           </p>
+        </div>
+        <div className="mt-6 pt-4 border-t border-white/10 flex items-center gap-2 text-[11px] font-mono text-[#e2b774]">
+          <Sparkles size={14} /> System Operational
         </div>
       </div>
 
@@ -35,10 +43,11 @@ export default function OverviewTab({
         >
           <div>
             <h3 className="font-serif text-lg mb-1 group-hover:text-[#e2b774] transition-colors">
-              Bakery Product Catalog
+              Artisanal Product Catalog
             </h3>
             <p className="text-xs text-[#9c8e82]">
-              Explore {productsCount} active artisan baked goods and pricing.
+              Explore and manage {productsCount} active artisan baked goods,
+              pricing, and attached imagery.
             </p>
           </div>
           <Package className="text-[#e2b774]" size={20} />
@@ -50,11 +59,11 @@ export default function OverviewTab({
         >
           <div>
             <h3 className="font-serif text-lg mb-1 group-hover:text-[#e2b774] transition-colors">
-              Request Tracking & Submissions
+              Request Tracking & Production Pipeline
             </h3>
             <p className="text-xs text-[#9c8e82]">
-              You have {requestsCount} active logged requests in the database
-              queue.
+              You have {requestsCount} active logged requests in the queue
+              waiting for processing.
             </p>
           </div>
           <Clock className="text-[#e2b774]" size={20} />
