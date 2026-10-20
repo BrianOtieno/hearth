@@ -573,7 +573,7 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
               type="text"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
-              placeholder="e.g. Kilimani Quickmart Branch"
+              placeholder="e.g. California Market"
               disabled={!!activeDeliveryId}
               required
               className="w-full bg-[#0e1113] text-[#fbf9f5] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#e2b774] disabled:opacity-50"
