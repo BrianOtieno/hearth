@@ -16,6 +16,7 @@ func RunMigrations(db *gorm.DB) {
 		&models.Delivery{},
 		&models.DeliveryItem{},
 		&models.Request{},
+		
 	)
 
 	if err != nil {

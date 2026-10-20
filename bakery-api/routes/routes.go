@@ -17,6 +17,8 @@ func RegisterRoutes(r *gin.Engine) {
 	authenticated.Use(middleware.AuthMiddleware())
 	{
 		authenticated.GET("/deliveries", handlers.GetDeliveriesHandler)
+		authenticated.POST("/deliveries", handlers.CreateDeliveryHandler)
+		authenticated.PUT("/deliveries/:id", handlers.UpdateDeliveryHandler) // Added for full delivery editing
 		authenticated.PUT("/deliveries/:id/items", handlers.UpdateDeliveryItemsHandler)
 		authenticated.POST("/deliveries/:id/start", handlers.StartDeliveryHandler)
 		authenticated.POST("/deliveries/:id/complete", handlers.CompleteDeliveryHandler)
@@ -28,6 +30,6 @@ func RegisterRoutes(r *gin.Engine) {
 		authenticated.PUT("/products/:id", middleware.AdminOnlyMiddleware(), handlers.UpdateProductHandler)
 		authenticated.DELETE("/products/:id", middleware.AdminOnlyMiddleware(), handlers.DeleteProductHandler)
 		authenticated.PATCH("/requests/:id/status", middleware.AdminOnlyMiddleware(), handlers.UpdateRequestStatusHandler)
-		authenticated.POST("/upload", middleware.AdminOnlyMiddleware(), handlers.UploadImageHandler)
+		authenticated.POST("/upload", handlers.UploadImageHandler)
 	}
 }

@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, LayoutDashboard, ShoppingBag, Clock } from "lucide-react";
+import {
+  LogOut,
+  LayoutDashboard,
+  ShoppingBag,
+  Clock,
+  Truck,
+} from "lucide-react";
 import { apiFetch } from "../services/api";
 
 import OverviewTab from "../components/dashboard/OverviewTab";
 import CatalogTab from "../components/dashboard/CatalogTab";
 import RequestsTab from "../components/dashboard/RequestsTab";
+import DeliveriesTab from "../components/dashboard/DeliveriesTab";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -15,6 +22,7 @@ export default function Dashboard() {
 
   const [products, setProducts] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [deliveries, setDeliveries] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -29,6 +37,7 @@ export default function Dashboard() {
 
   async function loadDashboardData() {
     setLoading(true);
+
     try {
       const prodData = await apiFetch("/products").catch(() => []);
       setProducts(Array.isArray(prodData) ? prodData : []);
@@ -44,6 +53,15 @@ export default function Dashboard() {
       console.error("Failed to load requests", err);
       setRequests([]);
     }
+
+    try {
+      const delivData = await apiFetch("/deliveries").catch(() => []);
+      setDeliveries(Array.isArray(delivData) ? delivData : []);
+    } catch (err) {
+      console.error("Failed to load deliveries", err);
+      setDeliveries([]);
+    }
+
     setLoading(false);
   }
 
@@ -102,7 +120,7 @@ export default function Dashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex bg-black/30 p-1 rounded-xl border border-white/10">
+          <div className="flex bg-black/30 p-1 rounded-xl border border-white/10 flex-wrap">
             <button
               onClick={() => setActiveTab("overview")}
               className={`px-4 py-2 text-xs font-mono rounded-lg transition-all flex items-center gap-1.5 ${
@@ -132,6 +150,16 @@ export default function Dashboard() {
               }`}
             >
               <Clock size={14} /> Requests
+            </button>
+            <button
+              onClick={() => setActiveTab("deliveries")}
+              className={`px-4 py-2 text-xs font-mono rounded-lg transition-all flex items-center gap-1.5 ${
+                activeTab === "deliveries"
+                  ? "bg-[#e2b774] text-[#140f0c] font-medium"
+                  : "text-[#9c8e82] hover:text-[#fbf9f5]"
+              }`}
+            >
+              <Truck size={14} /> Deliveries
             </button>
           </div>
 
@@ -181,6 +209,13 @@ export default function Dashboard() {
             setSelectedProduct={setSelectedProduct}
             handleAddRequest={handleAddRequest}
             setRequests={setRequests}
+            userRole={userRole}
+          />
+        )}
+        {activeTab === "deliveries" && (
+          <DeliveriesTab
+            deliveries={deliveries}
+            setDeliveries={setDeliveries}
             userRole={userRole}
           />
         )}
