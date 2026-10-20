@@ -11,6 +11,7 @@ import {
   X,
   Search,
   Filter,
+  Maximize2,
 } from "lucide-react";
 import { apiFetch } from "../../services/api";
 
@@ -37,6 +38,9 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
   // Filter & Search States
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Lightbox Modal State for browsing photos
+  const [modalImage, setModalImage] = useState(null);
 
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -245,7 +249,6 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
 
   // Role-based filtering + Search query & Status filtering
   const filteredDeliveries = (deliveries || []).filter((deliv) => {
-    // 1. Role Check
     if (!isAdmin) {
       const recordUserId = deliv.user_id || deliv.UserID;
       const recordUser = deliv.User || {};
@@ -260,13 +263,11 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
       if (!matchesId && !matchesName) return false;
     }
 
-    // 2. Status Filter Check
     const status = (deliv.status || deliv.Status || "").toLowerCase();
     if (statusFilter !== "all" && status !== statusFilter.toLowerCase()) {
       return false;
     }
 
-    // 3. Search Query Check (Store Name or Notes)
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       const store = (deliv.store_name || deliv.StoreName || "").toLowerCase();
@@ -289,7 +290,6 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
     return true;
   });
 
-  // Group deliveries into Today vs Previous
   const todayStr = new Date().toDateString();
   const todaysDeliveries = filteredDeliveries.filter((deliv) => {
     const dateStr = deliv.CreatedAt || deliv.created_at;
@@ -303,7 +303,6 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
     return new Date(dateStr).toDateString() !== todayStr;
   });
 
-  // Helper renderer for delivery cards
   function renderDeliveryCard(deliv, isEditable = false) {
     const delivId = deliv.ID || deliv.id;
     const createdAtStr = deliv.CreatedAt || deliv.created_at;
@@ -380,11 +379,14 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             <div className="bg-[#161b22] p-3 rounded-lg border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => setModalImage(editBeforePhoto)}
+              >
                 <img
                   src={editBeforePhoto}
                   alt="Before"
-                  className="w-10 h-10 object-cover rounded"
+                  className="w-10 h-10 object-cover rounded border border-white/10"
                 />
                 <span className="text-[11px] font-mono text-[#9c8e82]">
                   Before Photo
@@ -402,11 +404,14 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
             </div>
 
             <div className="bg-[#161b22] p-3 rounded-lg border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={() => setModalImage(editAfterPhoto)}
+              >
                 <img
                   src={editAfterPhoto}
                   alt="After"
-                  className="w-10 h-10 object-cover rounded"
+                  className="w-10 h-10 object-cover rounded border border-white/10"
                 />
                 <span className="text-[11px] font-mono text-[#9c8e82]">
                   After Photo
@@ -426,6 +431,9 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
         </div>
       );
     }
+
+    const beforeImg = deliv.before_photo || deliv.BeforePhoto;
+    const afterImg = deliv.after_photo || deliv.AfterPhoto;
 
     return (
       <div
@@ -476,12 +484,8 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
                   setEditLat(deliv.store_lat || deliv.StoreLat || "");
                   setEditLng(deliv.store_lng || deliv.StoreLng || "");
                   setEditNotes(deliv.notes || deliv.Notes || "");
-                  setEditBeforePhoto(
-                    deliv.before_photo || deliv.BeforePhoto || "",
-                  );
-                  setEditAfterPhoto(
-                    deliv.after_photo || deliv.AfterPhoto || "",
-                  );
+                  setEditBeforePhoto(beforeImg || "");
+                  setEditAfterPhoto(afterImg || "");
                 }}
                 className="text-[11px] font-mono text-[#e2b774] hover:underline flex items-center gap-1"
               >
@@ -491,30 +495,46 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
           </div>
         </div>
 
-        {/* Before/After Thumbnails */}
+        {/* Clickable Before/After Thumbnails */}
         <div className="flex items-center gap-3">
-          {(deliv.before_photo || deliv.BeforePhoto) && (
-            <div className="text-center">
+          {beforeImg && (
+            <div
+              className="text-center group cursor-pointer"
+              onClick={() => setModalImage(beforeImg)}
+            >
               <span className="text-[10px] font-mono text-[#9c8e82] block mb-1">
                 Before
               </span>
-              <img
-                src={deliv.before_photo || deliv.BeforePhoto}
-                alt="Before shelf"
-                className="w-14 h-14 object-cover rounded-lg border border-white/10"
-              />
+              <div className="relative">
+                <img
+                  src={beforeImg}
+                  alt="Before shelf"
+                  className="w-14 h-14 object-cover rounded-lg border border-white/10 group-hover:border-[#e2b774] transition-colors"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                  <Maximize2 size={14} className="text-[#e2b774]" />
+                </div>
+              </div>
             </div>
           )}
-          {(deliv.after_photo || deliv.AfterPhoto) && (
-            <div className="text-center">
+          {afterImg && (
+            <div
+              className="text-center group cursor-pointer"
+              onClick={() => setModalImage(afterImg)}
+            >
               <span className="text-[10px] font-mono text-[#9c8e82] block mb-1">
                 After
               </span>
-              <img
-                src={deliv.after_photo || deliv.AfterPhoto}
-                alt="After shelf"
-                className="w-14 h-14 object-cover rounded-lg border border-white/10"
-              />
+              <div className="relative">
+                <img
+                  src={afterImg}
+                  alt="After shelf"
+                  className="w-14 h-14 object-cover rounded-lg border border-white/10 group-hover:border-[#e2b774] transition-colors"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                  <Maximize2 size={14} className="text-[#e2b774]" />
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -553,7 +573,7 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
               type="text"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
-              placeholder="e.g. Vallarta Supermarkets"
+              placeholder="e.g. Kilimani Quickmart Branch"
               disabled={!!activeDeliveryId}
               required
               className="w-full bg-[#0e1113] text-[#fbf9f5] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#e2b774] disabled:opacity-50"
@@ -595,7 +615,9 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
                 <img
                   src={beforePhotoUrl}
                   alt="Before shelf"
-                  className="w-16 h-16 object-cover rounded-lg border border-white/10"
+                  onClick={() => setModalImage(beforePhotoUrl)}
+                  className="w-16 h-16 object-cover rounded-lg border border-white/10 cursor-pointer hover:border-[#e2b774] transition-colors"
+                  title="Click to expand"
                 />
                 <span className="text-xs font-mono text-[#9c8e82]">
                   Initial shelf state captured successfully.
@@ -635,7 +657,9 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
                 <img
                   src={afterPhotoUrl}
                   alt="After shelf"
-                  className="w-16 h-16 object-cover rounded-lg border border-white/10"
+                  onClick={() => setModalImage(afterPhotoUrl)}
+                  className="w-16 h-16 object-cover rounded-lg border border-white/10 cursor-pointer hover:border-[#e2b774] transition-colors"
+                  title="Click to expand"
                 />
                 <span className="text-xs font-mono text-[#9c8e82]">
                   Restocked shelf state verified.
@@ -746,6 +770,31 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
           )}
         </div>
       </div>
+
+      {/* Photo Lightbox Modal */}
+      {modalImage && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setModalImage(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-[#161b22] border border-white/15 rounded-2xl p-3 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setModalImage(null)}
+              className="absolute -top-3 -right-3 bg-[#e2b774] text-[#140f0c] p-2 rounded-full shadow-lg hover:scale-105 transition-transform"
+            >
+              <X size={16} />
+            </button>
+            <img
+              src={modalImage}
+              alt="Expanded shelf verification"
+              className="max-w-full max-h-[80vh] object-contain rounded-xl border border-white/10"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
