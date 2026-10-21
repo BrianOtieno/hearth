@@ -18,11 +18,16 @@ func RegisterRoutes(r *gin.Engine) {
 	{
 		authenticated.GET("/deliveries", handlers.GetDeliveriesHandler)
 		authenticated.POST("/deliveries", handlers.CreateDeliveryHandler)
-		authenticated.PUT("/deliveries/:id", handlers.UpdateDeliveryHandler) // Added for full delivery editing
+		authenticated.PUT("/deliveries/:id", handlers.UpdateDeliveryHandler)
 		authenticated.PUT("/deliveries/:id/items", handlers.UpdateDeliveryItemsHandler)
 		authenticated.POST("/deliveries/:id/start", handlers.StartDeliveryHandler)
 		authenticated.POST("/deliveries/:id/complete", handlers.CompleteDeliveryHandler)
 		authenticated.GET("/admin/summary", handlers.AdminSummaryHandler)
+
+		// User & Driver Management Routes (Admin Only)
+		authenticated.GET("/users", middleware.AdminOnlyMiddleware(), handlers.GetUsersHandler)
+		authenticated.PATCH("/users/:id/role", middleware.AdminOnlyMiddleware(), handlers.UpdateUserRoleHandler)
+
 		authenticated.GET("/requests", handlers.GetRequestsHandler)
 		authenticated.POST("/requests", handlers.CreateRequestHandler)
 		authenticated.GET("/products", handlers.GetProductsHandler)

@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   Clock,
   Truck,
+  Users,
 } from "lucide-react";
 import { apiFetch } from "../services/api";
 
@@ -13,6 +14,7 @@ import OverviewTab from "../components/dashboard/OverviewTab";
 import CatalogTab from "../components/dashboard/CatalogTab";
 import RequestsTab from "../components/dashboard/RequestsTab";
 import DeliveriesTab from "../components/dashboard/DeliveriesTab";
+import UsersTab from "../components/dashboard/UsersTab";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ export default function Dashboard() {
   const [products, setProducts] = useState([]);
   const [requests, setRequests] = useState([]);
   const [deliveries, setDeliveries] = useState([]);
+  const [users, setUsers] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -32,10 +35,10 @@ export default function Dashboard() {
     setUserName(name);
     setUserRole(role);
 
-    loadDashboardData();
+    loadDashboardData(role);
   }, []);
 
-  async function loadDashboardData() {
+  async function loadDashboardData(role) {
     setLoading(true);
 
     try {
@@ -60,6 +63,16 @@ export default function Dashboard() {
     } catch (err) {
       console.error("Failed to load deliveries", err);
       setDeliveries([]);
+    }
+
+    if (role === "admin") {
+      try {
+        const usersData = await apiFetch("/users").catch(() => []);
+        setUsers(Array.isArray(usersData) ? usersData : []);
+      } catch (err) {
+        console.error("Failed to load users", err);
+        setUsers([]);
+      }
     }
 
     setLoading(false);
@@ -87,10 +100,6 @@ export default function Dashboard() {
     if (newProduct) {
       setProducts([newProduct, ...products]);
     }
-  }
-
-  function handleProductDeleted(deletedId) {
-    setProducts(products.filter((p) => (p.ID || p.id) !== deletedId));
   }
 
   function handleLogout() {
@@ -161,6 +170,18 @@ export default function Dashboard() {
             >
               <Truck size={14} /> Deliveries
             </button>
+            {userRole === "admin" && (
+              <button
+                onClick={() => setActiveTab("users")}
+                className={`px-4 py-2 text-xs font-mono rounded-lg transition-all flex items-center gap-1.5 ${
+                  activeTab === "users"
+                    ? "bg-[#e2b774] text-[#140f0c] font-medium"
+                    : "text-[#9c8e82] hover:text-[#fbf9f5]"
+                }`}
+              >
+                <Users size={14} /> Drivers & Users
+              </button>
+            )}
           </div>
 
           <button
@@ -218,6 +239,9 @@ export default function Dashboard() {
             setDeliveries={setDeliveries}
             userRole={userRole}
           />
+        )}
+        {activeTab === "users" && (
+          <UsersTab users={users} setUsers={setUsers} userRole={userRole} />
         )}
       </div>
     </div>
