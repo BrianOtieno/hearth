@@ -1,5 +1,15 @@
 import React, { useState } from "react";
-import { Plus, Edit2, Trash2, X, Image as ImageIcon, Tag, Upload } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Image as ImageIcon,
+  Tag,
+  Upload,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { apiFetch } from "../../services/api";
 
 export default function CatalogTab({
@@ -19,6 +29,10 @@ export default function CatalogTab({
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Pagination State for Catalog Grid
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 4;
 
   const isAdmin = userRole === "admin";
 
@@ -155,13 +169,22 @@ export default function CatalogTab({
     }
   }
 
+  // Pagination Calculations
+  const safeProducts = Array.isArray(products) ? products : [];
+  const totalPages = Math.ceil(safeProducts.length / pageSize) || 1;
+  const paginatedProducts = safeProducts.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
   return (
     <div className="space-y-6 animate-fadeIn">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="font-serif text-2xl">Artisanal Inventory Catalog</h2>
           <p className="text-xs text-[#9c8e82] mt-0.5">
-            Current production lines available at Hearth & Grain.
+            Current production lines available at Hearth & Grain. (
+            {safeProducts.length} items total)
           </p>
         </div>
         {isAdmin && (
@@ -255,7 +278,9 @@ export default function CatalogTab({
               <div className="flex items-center gap-2">
                 <label className="flex-1 flex items-center justify-center gap-2 bg-[#0e1113] hover:bg-black/40 text-[#fbf9f5] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-mono cursor-pointer transition-colors border-dashed">
                   <Upload size={14} className="text-[#e2b774]" />
-                  <span>{uploading ? "Uploading..." : "Choose Image File"}</span>
+                  <span>
+                    {uploading ? "Uploading..." : "Choose Image File"}
+                  </span>
                   <input
                     type="file"
                     accept="image/*"
@@ -318,71 +343,121 @@ export default function CatalogTab({
         </form>
       )}
 
-      {/* Product Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {products.map((product) => {
-          const prodId = product.ID || product.id;
-          const img = product.image_url || product.imageUrl;
-          const cat = product.category || "Breads";
+      {/* Product Grid & Pagination Container */}
+      <div className="bg-[#161b22] border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="flex justify-between items-center border-b border-white/15 pb-3">
+          <h3 className="text-xs font-mono uppercase tracking-wider text-[#9c8e82]">
+            Catalog Inventory Items
+          </h3>
+          {safeProducts.length > 0 && (
+            <span className="text-[10px] font-mono text-[#9c8e82]">
+              Page {currentPage} of {totalPages}
+            </span>
+          )}
+        </div>
 
-          return (
-            <div
-              key={prodId}
-              className="bg-[#161b22] border border-white/10 rounded-2xl p-5 shadow-lg flex gap-4 items-start"
-            >
-              {img ? (
-                <img
-                  src={img}
-                  alt={product.name}
-                  className="w-20 h-20 object-cover rounded-xl border border-white/10 flex-shrink-0"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-black/30 rounded-xl border border-white/10 flex items-center justify-center text-[#9c8e82] flex-shrink-0">
-                  <ImageIcon size={24} />
-                </div>
-              )}
+        {safeProducts.length === 0 ? (
+          <p className="text-xs text-[#9c8e82] text-center py-8 font-mono">
+            No products found in the catalog.
+          </p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {paginatedProducts.map((product) => {
+                const prodId = product.ID || product.id;
+                const img = product.image_url || product.imageUrl;
+                const cat = product.category || "Breads";
 
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start mb-1 gap-2">
-                  <h3 className="font-serif text-lg truncate">
-                    {product.name}
-                  </h3>
-                  <span className="font-mono text-xs text-[#e2b774] bg-[#e2b774]/10 px-2.5 py-1 rounded-lg border border-[#e2b774]/25 whitespace-nowrap">
-                    ${product.price?.toFixed(2)}
-                  </span>
-                </div>
+                return (
+                  <div
+                    key={prodId}
+                    className="bg-[#0e1113] border border-white/10 rounded-xl p-4 flex gap-4 items-start"
+                  >
+                    {img ? (
+                      <img
+                        src={img}
+                        alt={product.name}
+                        className="w-20 h-20 object-cover rounded-xl border border-white/10 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-black/30 rounded-xl border border-white/10 flex items-center justify-center text-[#9c8e82] flex-shrink-0">
+                        <ImageIcon size={24} />
+                      </div>
+                    )}
 
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Tag size={12} className="text-[#9c8e82]" />
-                  <span className="text-[10px] font-mono text-[#9c8e82] uppercase tracking-wider bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
-                    {cat}
-                  </span>
-                </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1 gap-2">
+                        <h3 className="font-serif text-lg truncate">
+                          {product.name}
+                        </h3>
+                        <span className="font-mono text-xs text-[#e2b774] bg-[#e2b774]/10 px-2.5 py-1 rounded-lg border border-[#e2b774]/25 whitespace-nowrap">
+                          ${product.price?.toFixed(2)}
+                        </span>
+                      </div>
 
-                <p className="text-xs text-[#9c8e82] leading-relaxed line-clamp-2">
-                  {product.description}
-                </p>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Tag size={12} className="text-[#9c8e82]" />
+                        <span className="text-[10px] font-mono text-[#9c8e82] uppercase tracking-wider bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+                          {cat}
+                        </span>
+                      </div>
 
-                {isAdmin && (
-                  <div className="flex items-center justify-end gap-1.5 mt-3 pt-3 border-t border-white/10">
-                    <button
-                      onClick={() => handleOpenEdit(product)}
-                      className="px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-mono text-[#9c8e82] hover:text-[#fbf9f5] transition-colors flex items-center gap-1"
-                    >
-                      <Edit2 size={12} /> Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(prodId)}
-                      className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 rounded-lg text-xs font-mono text-rose-400 transition-colors flex items-center gap-1"
-                    >
-                      <Trash2 size={12} /> Delete
-                    </button>
+                      <p className="text-xs text-[#9c8e82] leading-relaxed line-clamp-2">
+                        {product.description}
+                      </p>
+
+                      {isAdmin && (
+                        <div className="flex items-center justify-end gap-1.5 mt-3 pt-3 border-t border-white/10">
+                          <button
+                            onClick={() => handleOpenEdit(product)}
+                            className="px-2.5 py-1 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-mono text-[#9c8e82] hover:text-[#fbf9f5] transition-colors flex items-center gap-1"
+                          >
+                            <Edit2 size={12} /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(prodId)}
+                            className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/20 rounded-lg text-xs font-mono text-rose-400 transition-colors flex items-center gap-1"
+                          >
+                            <Trash2 size={12} /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
+                );
+              })}
             </div>
-          );
-        })}
+
+            {/* Pagination Controls Bar */}
+            {totalPages > 1 && (
+              <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-[#0e1113] hover:bg-white/5 border border-white/10 rounded-lg text-xs font-mono text-[#fbf9f5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={14} /> Previous
+                </button>
+
+                <span className="text-xs font-mono text-[#9c8e82]">
+                  Showing {(currentPage - 1) * pageSize + 1} -{" "}
+                  {Math.min(currentPage * pageSize, safeProducts.length)} of{" "}
+                  {safeProducts.length}
+                </span>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(p + 1, totalPages))
+                  }
+                  className="flex items-center gap-1 px-3 py-1.5 bg-[#0e1113] hover:bg-white/5 border border-white/10 rounded-lg text-xs font-mono text-[#fbf9f5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next <ChevronRight size={14} />
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

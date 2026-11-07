@@ -12,6 +12,8 @@ import {
   Search,
   Filter,
   Maximize2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { apiFetch } from "../../services/api";
 
@@ -38,6 +40,10 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
   // Filter & Search States
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Pagination State for Previous Deliveries
+  const [prevPage, setPrevPage] = useState(1);
+  const pageSize = 5;
 
   // Lightbox Modal State for browsing photos
   const [modalImage, setModalImage] = useState(null);
@@ -84,7 +90,6 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
     setError("");
 
     try {
-      const token = localStorage.getItem("hearth_token");
       let deliveryId = activeDeliveryId;
 
       if (!deliveryId) {
@@ -101,6 +106,7 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
         setActiveDeliveryId(deliveryId);
       }
 
+      const token = localStorage.getItem("hearth_token");
       const res = await fetch(
         `http://localhost:8084/deliveries/${deliveryId}/start`,
         {
@@ -203,7 +209,7 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
     }
   }
 
-  // Save all edited fields to backend
+  // Save all edited fields to backend via PUT /deliveries/:id
   async function handleSaveFullEdit(delivId) {
     try {
       await apiFetch(`/deliveries/${delivId}`, {
@@ -226,10 +232,10 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
                   ...d,
                   store_name: editStoreName,
                   StoreName: editStoreName,
-                  store_lat: editLat,
-                  StoreLat: editLat,
-                  store_lng: editLng,
-                  StoreLng: editLng,
+                  store_lat: editLat ? parseFloat(editLat) : 0.0,
+                  StoreLat: editLat ? parseFloat(editLat) : 0.0,
+                  store_lng: editLng ? parseFloat(editLng) : 0.0,
+                  StoreLng: editLng ? parseFloat(editLng) : 0.0,
                   notes: editNotes,
                   Notes: editNotes,
                   before_photo: editBeforePhoto,
@@ -244,6 +250,7 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
       setEditingId(null);
     } catch (err) {
       console.error("Failed to update delivery", err);
+      alert("Could not update delivery record.");
     }
   }
 
@@ -302,6 +309,13 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
     if (!dateStr) return true;
     return new Date(dateStr).toDateString() !== todayStr;
   });
+
+  // Pagination Calculations for Previous Deliveries
+  const totalPages = Math.ceil(previousDeliveries.length / pageSize) || 1;
+  const paginatedPreviousDeliveries = previousDeliveries.slice(
+    (prevPage - 1) * pageSize,
+    prevPage * pageSize,
+  );
 
   function renderDeliveryCard(deliv, isEditable = false) {
     const delivId = deliv.ID || deliv.id;
@@ -573,7 +587,7 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
               type="text"
               value={storeName}
               onChange={(e) => setStoreName(e.target.value)}
-              placeholder="e.g. California Market"
+              placeholder="e.g. Kilimani Quickmart Branch"
               disabled={!!activeDeliveryId}
               required
               className="w-full bg-[#0e1113] text-[#fbf9f5] border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#e2b774] disabled:opacity-50"
@@ -734,7 +748,7 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
 
       {/* Grouped Delivery Logs */}
       <div className="space-y-6">
-        {/* Today's Submissions */}
+        {/* Today's Submissions (Editable) */}
         <div className="bg-[#161b22] border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
           <h3 className="text-xs font-mono uppercase tracking-wider text-[#e2b774] border-b border-white/15 pb-3 flex items-center gap-2">
             <Calendar size={14} /> Today's Deliveries ({todaysDeliveries.length}
@@ -752,21 +766,61 @@ export default function DeliveriesTab({ deliveries, setDeliveries, userRole }) {
           )}
         </div>
 
-        {/* Previous Submissions */}
+        {/* Previous Submissions (Paginated) */}
         <div className="bg-[#161b22] border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
-          <h3 className="text-xs font-mono uppercase tracking-wider text-[#9c8e82] border-b border-white/15 pb-3 flex items-center gap-2">
-            <Clock size={14} /> Previous Deliveries ({previousDeliveries.length}
-            )
-          </h3>
+          <div className="flex justify-between items-center border-b border-white/15 pb-3">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-[#9c8e82] flex items-center gap-2">
+              <Clock size={14} /> Previous Deliveries (
+              {previousDeliveries.length})
+            </h3>
+            {previousDeliveries.length > 0 && (
+              <span className="text-[10px] font-mono text-[#9c8e82]">
+                Page {prevPage} of {totalPages}
+              </span>
+            )}
+          </div>
 
           {previousDeliveries.length === 0 ? (
             <p className="text-xs text-[#9c8e82] text-center py-6 font-mono">
               No matching previous delivery logs found.
             </p>
           ) : (
-            <div className="space-y-4">
-              {previousDeliveries.map((d) => renderDeliveryCard(d, false))}
-            </div>
+            <>
+              <div className="space-y-4">
+                {paginatedPreviousDeliveries.map((d) =>
+                  renderDeliveryCard(d, false),
+                )}
+              </div>
+
+              {/* Pagination Controls Bar */}
+              {totalPages > 1 && (
+                <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                  <button
+                    disabled={prevPage === 1}
+                    onClick={() => setPrevPage((p) => Math.max(p - 1, 1))}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[#0e1113] hover:bg-white/5 border border-white/10 rounded-lg text-xs font-mono text-[#fbf9f5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <ChevronLeft size={14} /> Previous
+                  </button>
+
+                  <span className="text-xs font-mono text-[#9c8e82]">
+                    Showing {(prevPage - 1) * pageSize + 1} -{" "}
+                    {Math.min(prevPage * pageSize, previousDeliveries.length)}{" "}
+                    of {previousDeliveries.length}
+                  </span>
+
+                  <button
+                    disabled={prevPage === totalPages}
+                    onClick={() =>
+                      setPrevPage((p) => Math.min(p + 1, totalPages))
+                    }
+                    className="flex items-center gap-1 px-3 py-1.5 bg-[#0e1113] hover:bg-white/5 border border-white/10 rounded-lg text-xs font-mono text-[#fbf9f5] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next <ChevronRight size={14} />
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
